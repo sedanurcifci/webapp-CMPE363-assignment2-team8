@@ -1,0 +1,74 @@
+﻿@page "/counter"
+@using GetDataFromAzureDb.Models;
+
+<h1>Employee Add</h1>
+
+<div class="form-group">
+    <label for="Name">İsim</label>
+    <input type="text" @bind="newEmployee.TblEmployee.EmpName" name="isim" id="isim" class="form-control" placeholder="İsim" required="true" />
+  </div>
+  <div class="form-group">
+    <label for="Name">Soyisim</label>
+    <input type="text" @bind="newEmployee.TblEmployee.EmpSurname" name="soyisim" id="soyisim" class="form-control" placeholder="Soyisim" required="true" />
+  </div>
+  <div class="form-group">
+    <label for="Name">Adres</label>
+    <input type="text" @bind="newEmployee.TblEmployee.EmpAddress" name="adres" id="adres" class="form-control" placeholder="Adres" required="true" />
+  </div>
+  <div class="form-group">
+    <label for="Name">Telefon</label>
+    <input type="text" @bind="newEmployee.TblEmployee.EmpPhone" name="telefon" id="telefon" class="form-control" placeholder="Telefon" required="true" />
+  </div>
+  <br />
+   <td>
+       <button type="button" class="btn btn-block btn-outline-primary"  @onclick="AddUser">Kullanıcı Ekle</button>
+   </td>
+
+@code {
+    TblEmployeeData newEmployee = new TblEmployeeData();
+    string ErrorCode = "";
+    string SuccessCode = "";
+    GetDataFromAzureDbContext getDataFromAzureDbContext = new GetDataFromAzureDbContext();
+    protected async void AddUser()
+    {
+
+        if (newEmployee == null)
+        {
+            ErrorCode = "Beklenmeyen Hata";
+        }
+        if (string.IsNullOrEmpty(newEmployee.TblEmployee.EmpName))
+        {
+            ErrorCode = "İsim Boş Olamaz";
+            return;
+        }
+        else if (string.IsNullOrEmpty(newEmployee.TblEmployee.EmpSurname))
+        {
+            ErrorCode = "Soyisim Boş Olamaz";
+            return;
+        }
+        else if (string.IsNullOrEmpty(newEmployee.TblEmployee.EmpAddress))
+        {
+            ErrorCode = "Adres Boş Olamaz";
+            return;
+        }
+        else if (string.IsNullOrEmpty(newEmployee.TblEmployee.EmpPhone))
+        {
+            ErrorCode = "Telefon Boş Olamaz";
+            return;
+        }
+        var result = getDataFromAzureDbContext.Add(newEmployee.TblEmployee);
+        getDataFromAzureDbContext.SaveChanges();
+        await InvokeAsync(StateHasChanged);
+
+        newEmployee.TblEmployee.EmpName = "";
+        newEmployee.TblEmployee.EmpSurname = "";
+        newEmployee.TblEmployee.EmpAddress = "";
+        newEmployee.TblEmployee.EmpPhone = "";
+    }
+    protected override async Task OnInitializedAsync()
+    {
+
+        newEmployee.TblEmployee = new TblEmployee();
+        StateHasChanged();
+    }
+}

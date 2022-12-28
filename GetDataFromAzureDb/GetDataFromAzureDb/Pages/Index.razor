@@ -1,0 +1,77 @@
+﻿@page "/"
+@using GetDataFromAzureDb.Models;
+@inject NavigationManager _navigationManager
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>EmpName</th>
+            <th>EmpSurname</th>
+            <th>EmpAddress</th>
+            <th>EmpPhone</th>
+            <th>Sil</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var employee in employees)
+        {
+            <tr>
+                <td>@employee.TblEmployee.EmpName</td>
+                <td>@employee.TblEmployee.EmpSurname</td>
+                <td>@employee.TblEmployee.EmpAddress</td>
+                <td>@employee.TblEmployee.EmpPhone</td>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary" @onclick="@(() => {GetToForm(employee); Delete();})">Sil</button>
+                </div>
+            </tr>
+
+        }
+    </tbody>
+</table>
+
+<style>
+    .btn:focus {
+        background-color: #ff6e40;
+    }
+</style>
+
+
+@code {
+    GetDataFromAzureDbContext getDataFromAzureDbContext = new GetDataFromAzureDbContext();
+    List<TblEmployeeData> employees = new List<TblEmployeeData>();
+    List<TblEmployeeData> employees2 = new List<TblEmployeeData>();
+    TblEmployee employee1 = new TblEmployee();
+    TblEmployee employee2 = new TblEmployee();
+    protected override void OnInitialized()
+    {
+        GetEmployees();
+        StateHasChanged();
+    }
+
+    private async void GetEmployees()
+    {
+        var result = getDataFromAzureDbContext.tblEmployee.ToList();
+        var allUser = result;
+        foreach (var oneUser in allUser)
+        {
+            var generalWrapper = new TblEmployeeData();
+            generalWrapper.TblEmployee = oneUser;
+            employees.Add(generalWrapper);
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void GetToForm(TblEmployeeData employeeDeleteClicked)
+    {
+        employee1 = employeeDeleteClicked.TblEmployee;
+    }
+
+    private async void Delete()
+    {
+        var result = getDataFromAzureDbContext.Remove(employee1);
+        getDataFromAzureDbContext.SaveChanges();
+        await InvokeAsync(StateHasChanged);
+        employees = employees.Where(c => c.TblEmployee.ID != employee1.ID).ToList();
+    }
+
+}
